@@ -13,17 +13,17 @@ cd G:\MyProjects\odyssey_backend
 python run.py
 ```
 
-The server will start on http://localhost:8000
+The server will start on http://localhost:8546
 
 ## Test the API
 
 ### Health Check
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8546/health
 ```
 
 ### API Documentation
-Open in browser: http://localhost:8000/docs
+Open in browser: http://localhost:8546/docs
 
 ### Test User Created
 - Email: test@odyssey.com
@@ -33,21 +33,21 @@ Open in browser: http://localhost:8000/docs
 
 **Register:**
 ```bash
-curl -X POST http://localhost:8000/api/v1/auth/register \
+curl -X POST http://localhost:8546/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"newuser@test.com","password":"password123"}'
 ```
 
 **Login:**
 ```bash
-curl -X POST http://localhost:8000/api/v1/auth/login \
+curl -X POST http://localhost:8546/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@odyssey.com","password":"test123456"}'
 ```
 
 **Get Current User (requires token):**
 ```bash
-curl -X GET http://localhost:8000/api/v1/auth/me \
+curl -X GET http://localhost:8546/api/v1/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -60,7 +60,7 @@ curl -X GET http://localhost:8000/api/v1/auth/me \
 
 ## Important Notes
 
-- Backend runs on port **8000**
+- Backend runs on port **8546**
 - Uses the same PostgreSQL instance as pinpoint_backend
 - Database is on the cloud (not local Docker)
 - Migrations are already applied

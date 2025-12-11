@@ -19,7 +19,7 @@ docker-compose up -d
 
 This will start:
 - PostgreSQL database on `localhost:5432`
-- Backend API on `localhost:8000`
+- Backend API on `localhost:8546`
 
 ### Step 2: Check Logs
 
@@ -30,8 +30,8 @@ docker-compose logs -f backend
 ### Step 3: Test the API
 
 Open your browser and visit:
-- **API Docs:** http://localhost:8000/docs
-- **Health Check:** http://localhost:8000/health
+- **API Docs:** http://localhost:8546/docs
+- **Health Check:** http://localhost:8546/health
 
 ### Step 4: Stop Services
 
@@ -105,14 +105,14 @@ alembic upgrade head
 python run.py
 ```
 
-The API will be available at http://localhost:8000
+The API will be available at http://localhost:8546
 
 ## Testing the Auth Flow
 
 ### 1. Register a User
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/auth/register" \
+curl -X POST "http://localhost:8546/api/v1/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -132,7 +132,7 @@ Response:
 ### 2. Login
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
+curl -X POST "http://localhost:8546/api/v1/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -144,13 +144,13 @@ curl -X POST "http://localhost:8000/api/v1/auth/login" \
 
 ```bash
 # Replace {token} with the access_token from above
-curl -X GET "http://localhost:8000/api/v1/auth/me" \
+curl -X GET "http://localhost:8546/api/v1/auth/me" \
   -H "Authorization: Bearer {token}"
 ```
 
 ## Using Swagger UI (Recommended)
 
-1. Open http://localhost:8000/docs
+1. Open http://localhost:8546/docs
 2. Click "Authorize" button (top right)
 3. Enter: `Bearer {your_access_token}`
 4. Click "Authorize" and "Close"

@@ -63,7 +63,7 @@ docker-compose up -d
 
 This will start:
 - PostgreSQL database on port 5432
-- Backend API on port 8000
+- Backend API on port 8546
 
 ### 3. Run Locally (Without Docker)
 
@@ -95,9 +95,9 @@ python run.py
 
 Once running, visit:
 
-- **Swagger UI:** http://localhost:8000/docs
-- **ReDoc:** http://localhost:8000/redoc
-- **Health Check:** http://localhost:8000/health
+- **Swagger UI:** http://localhost:8546/docs
+- **ReDoc:** http://localhost:8546/redoc
+- **Health Check:** http://localhost:8546/health
 
 ## Database Migrations
 

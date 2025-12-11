@@ -94,3 +94,74 @@ class TripService:
         self.db.commit()
 
         return True
+
+    def create_default_trips_for_user(self, user_id: UUID) -> List[Trip]:
+        """
+        Create default sample trips for a new user.
+        Called after user registration to give them starter content.
+        """
+        from datetime import date, timedelta
+        
+        today = date.today()
+        
+        default_trips = [
+            {
+                "title": "Weekend in Paris",
+                "description": "A romantic getaway exploring the City of Lights. Visit the Eiffel Tower, stroll along the Seine, and enjoy French cuisine.",
+                "cover_image_url": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800",
+                "start_date": today + timedelta(days=30),
+                "end_date": today + timedelta(days=33),
+                "status": "planned",
+                "tags": ["europe", "romantic", "city"]
+            },
+            {
+                "title": "Tokyo Adventure",
+                "description": "Immerse yourself in Japanese culture, from ancient temples to modern technology. Experience sushi, anime, and cherry blossoms.",
+                "cover_image_url": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+                "start_date": today + timedelta(days=60),
+                "end_date": today + timedelta(days=70),
+                "status": "planned",
+                "tags": ["asia", "culture", "food"]
+            },
+            {
+                "title": "Bali Wellness Retreat",
+                "description": "Relax and rejuvenate in Bali's serene landscapes. Yoga sessions, spa treatments, and beautiful rice terraces await.",
+                "cover_image_url": "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800",
+                "start_date": today - timedelta(days=14),
+                "end_date": today - timedelta(days=7),
+                "status": "completed",
+                "tags": ["asia", "wellness", "beach"]
+            },
+            {
+                "title": "New York City Exploration",
+                "description": "The Big Apple awaits! Broadway shows, Central Park, amazing food, and the iconic skyline.",
+                "cover_image_url": "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800",
+                "start_date": today,
+                "end_date": today + timedelta(days=5),
+                "status": "ongoing",
+                "tags": ["usa", "city", "entertainment"]
+            }
+        ]
+        
+        created_trips = []
+        for trip_data in default_trips:
+            db_trip = Trip(
+                user_id=user_id,
+                title=trip_data["title"],
+                description=trip_data["description"],
+                cover_image_url=trip_data["cover_image_url"],
+                start_date=trip_data["start_date"],
+                end_date=trip_data["end_date"],
+                status=trip_data["status"],
+                tags=trip_data["tags"]
+            )
+            self.db.add(db_trip)
+            created_trips.append(db_trip)
+        
+        self.db.commit()
+        
+        # Refresh all trips to get their IDs
+        for trip in created_trips:
+            self.db.refresh(trip)
+        
+        return created_trips

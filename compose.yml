@@ -7,7 +7,7 @@ services:
     volumes:
       - ./app:/app/app
       - ./alembic:/app/alembic
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8546 --reload
     networks:
       - proxy
     labels:
@@ -15,7 +15,7 @@ services:
       - "traefik.http.routers.odyssey.rule=Host(`odyssey.pranta.dev`)"
       - "traefik.http.routers.odyssey.entrypoints=websecure"
       - "traefik.http.routers.odyssey.tls.certresolver=letsencrypt"
-      - "traefik.http.services.odyssey.loadbalancer.server.port=8000"
+      - "traefik.http.services.odyssey.loadbalancer.server.port=8546"
 
 networks:
   proxy:

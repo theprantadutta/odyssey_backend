@@ -2,7 +2,7 @@
 
 ## Base URL
 ```
-http://localhost:8000
+http://localhost:8546
 ```
 
 ## Authentication
@@ -304,7 +304,7 @@ POST /api/v1/memories/
 
 **cURL Example:**
 ```bash
-curl -X POST http://localhost:8000/api/v1/memories/ \
+curl -X POST http://localhost:8546/api/v1/memories/ \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -F "trip_id=uuid" \
   -F "latitude=48.8584" \
@@ -354,7 +354,7 @@ POST /api/v1/seed/demo-data
 
 **1. Register:**
 ```bash
-curl -X POST http://localhost:8000/api/v1/auth/register \
+curl -X POST http://localhost:8546/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"test123"}'
 ```
@@ -363,7 +363,7 @@ curl -X POST http://localhost:8000/api/v1/auth/register \
 
 **3. Create a trip:**
 ```bash
-curl -X POST http://localhost:8000/api/v1/trips/ \
+curl -X POST http://localhost:8546/api/v1/trips/ \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -380,7 +380,7 @@ curl -X POST http://localhost:8000/api/v1/trips/ \
 
 **5. Create an activity:**
 ```bash
-curl -X POST http://localhost:8000/api/v1/activities/ \
+curl -X POST http://localhost:8546/api/v1/activities/ \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -395,7 +395,7 @@ curl -X POST http://localhost:8000/api/v1/activities/ \
 
 **6. Or generate demo data:**
 ```bash
-curl -X POST http://localhost:8000/api/v1/seed/demo-data \
+curl -X POST http://localhost:8546/api/v1/seed/demo-data \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -434,7 +434,7 @@ curl -X POST http://localhost:8000/api/v1/seed/demo-data \
 
 ## API Documentation
 
-**Swagger UI:** http://localhost:8000/docs
-**ReDoc:** http://localhost:8000/redoc
+**Swagger UI:** http://localhost:8546/docs
+**ReDoc:** http://localhost:8546/redoc
 
 The interactive Swagger UI allows you to test all endpoints directly in the browser!
