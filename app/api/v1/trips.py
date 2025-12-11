@@ -119,3 +119,36 @@ async def delete_trip(
         )
 
     return None
+
+
+@router.post("/default-trips", status_code=status.HTTP_201_CREATED)
+async def create_default_trips(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Create default sample trips for the authenticated user.
+    Called during onboarding when user chooses to have pre-populated trips.
+
+    Creates 4 default trips:
+    - Weekend in Paris (planned)
+    - Tokyo Adventure (planned)
+    - Bali Wellness Retreat (completed)
+    - New York City Exploration (ongoing)
+    """
+    trip_service = TripService(db)
+
+    # Check if user already has trips (prevent duplicate creation)
+    existing_trips, count = trip_service.get_trips_by_user(current_user.id, skip=0, limit=1)
+    if count > 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User already has trips. Default trips can only be created for new users."
+        )
+
+    created_trips = trip_service.create_default_trips_for_user(current_user.id)
+
+    return {
+        "message": "Default trips created successfully",
+        "count": len(created_trips)
+    }

@@ -22,9 +22,7 @@ class AuthService:
         return self.db.query(User).filter(User.id == user_id).first()
 
     def create_user(self, user_data: UserRegister) -> User:
-        """Create a new user with default trips"""
-        from app.services.trip_service import TripService
-        
+        """Create a new user"""
         # Hash the password
         hashed_password = get_password_hash(user_data.password)
 
@@ -38,10 +36,6 @@ class AuthService:
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
-
-        # Create default trips for the new user
-        trip_service = TripService(self.db)
-        trip_service.create_default_trips_for_user(db_user.id)
 
         return db_user
 
