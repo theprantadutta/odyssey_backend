@@ -1,7 +1,29 @@
 """Trip schemas"""
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel, UUID4, Field
 from datetime import date, datetime
 from typing import Optional, List
+from enum import Enum
+
+
+class TripStatus(str, Enum):
+    """Trip status enum"""
+    planned = "planned"
+    ongoing = "ongoing"
+    completed = "completed"
+
+
+class SortField(str, Enum):
+    """Sortable fields for trips"""
+    created_at = "created_at"
+    start_date = "start_date"
+    title = "title"
+    updated_at = "updated_at"
+
+
+class SortOrder(str, Enum):
+    """Sort order"""
+    asc = "asc"
+    desc = "desc"
 
 
 class TripBase(BaseModel):
@@ -31,6 +53,38 @@ class TripUpdate(BaseModel):
     tags: Optional[List[str]] = None
 
 
+class TripSearchParams(BaseModel):
+    """Search and filter parameters for trips"""
+    search: Optional[str] = Field(
+        None,
+        description="Search term for title (partial match, case-insensitive)"
+    )
+    status: Optional[List[TripStatus]] = Field(
+        None,
+        description="Filter by status(es)"
+    )
+    start_date_from: Optional[date] = Field(
+        None,
+        description="Filter trips starting on or after this date"
+    )
+    start_date_to: Optional[date] = Field(
+        None,
+        description="Filter trips starting on or before this date"
+    )
+    tags: Optional[List[str]] = Field(
+        None,
+        description="Filter by tags (trips containing ANY of these tags)"
+    )
+    sort_by: SortField = Field(
+        SortField.created_at,
+        description="Field to sort by"
+    )
+    sort_order: SortOrder = Field(
+        SortOrder.desc,
+        description="Sort order (asc or desc)"
+    )
+
+
 class TripResponse(TripBase):
     """Trip response"""
     id: UUID4
@@ -48,3 +102,4 @@ class TripListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+    filters_applied: Optional[dict] = None

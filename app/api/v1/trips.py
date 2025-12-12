@@ -2,10 +2,21 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from uuid import UUID
+from datetime import date
+from typing import Optional, List
 from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
-from app.schemas.trip import TripCreate, TripUpdate, TripResponse, TripListResponse
+from app.schemas.trip import (
+    TripCreate,
+    TripUpdate,
+    TripResponse,
+    TripListResponse,
+    TripSearchParams,
+    TripStatus,
+    SortField,
+    SortOrder
+)
 from app.services.trip_service import TripService
 
 router = APIRouter()
@@ -15,30 +26,99 @@ router = APIRouter()
 async def list_trips(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+    search: Optional[str] = Query(
+        None,
+        description="Search term for title (partial match, case-insensitive)"
+    ),
+    status: Optional[List[TripStatus]] = Query(
+        None,
+        description="Filter by status(es): planned, ongoing, completed"
+    ),
+    start_date_from: Optional[date] = Query(
+        None,
+        description="Filter trips starting on or after this date"
+    ),
+    start_date_to: Optional[date] = Query(
+        None,
+        description="Filter trips starting on or before this date"
+    ),
+    tags: Optional[List[str]] = Query(
+        None,
+        description="Filter by tags (trips containing ANY of these tags)"
+    ),
+    sort_by: SortField = Query(
+        SortField.created_at,
+        description="Field to sort by: created_at, start_date, title, updated_at"
+    ),
+    sort_order: SortOrder = Query(
+        SortOrder.desc,
+        description="Sort order: asc or desc"
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    List all trips for authenticated user with pagination
+    List all trips for authenticated user with pagination and filtering
 
+    **Pagination:**
     - **page**: Page number (starts at 1)
     - **page_size**: Number of items per page (max 100)
+
+    **Search & Filters:**
+    - **search**: Search trips by title (partial match, case-insensitive)
+    - **status**: Filter by status (can specify multiple: ?status=planned&status=ongoing)
+    - **start_date_from**: Filter trips starting on or after this date
+    - **start_date_to**: Filter trips starting on or before this date
+    - **tags**: Filter by tags (trips containing ANY of the specified tags)
+
+    **Sorting:**
+    - **sort_by**: Field to sort by (created_at, start_date, title, updated_at)
+    - **sort_order**: Sort direction (asc or desc)
     """
     trip_service = TripService(db)
 
+    # Build search params if any filters are provided
+    search_params = None
+    if any([search, status, start_date_from, start_date_to, tags]) or \
+       sort_by != SortField.created_at or sort_order != SortOrder.desc:
+        search_params = TripSearchParams(
+            search=search,
+            status=status,
+            start_date_from=start_date_from,
+            start_date_to=start_date_to,
+            tags=tags,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+
     skip = (page - 1) * page_size
-    trips, total = trip_service.get_trips_by_user(
+    trips, total, filters_applied = trip_service.get_trips_by_user(
         user_id=current_user.id,
         skip=skip,
-        limit=page_size
+        limit=page_size,
+        search_params=search_params
     )
 
     return {
         "trips": trips,
         "total": total,
         "page": page,
-        "page_size": page_size
+        "page_size": page_size,
+        "filters_applied": filters_applied
     }
+
+
+@router.get("/tags", response_model=List[str])
+async def get_available_tags(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all unique tags used across the user's trips.
+    Useful for tag autocomplete/suggestions in the frontend.
+    """
+    trip_service = TripService(db)
+    return trip_service.get_available_tags(current_user.id)
 
 
 @router.post("/", response_model=TripResponse, status_code=status.HTTP_201_CREATED)
@@ -139,7 +219,7 @@ async def create_default_trips(
     trip_service = TripService(db)
 
     # Check if user already has trips (prevent duplicate creation)
-    existing_trips, count = trip_service.get_trips_by_user(current_user.id, skip=0, limit=1)
+    existing_trips, count, _ = trip_service.get_trips_by_user(current_user.id, skip=0, limit=1)
     if count > 0:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

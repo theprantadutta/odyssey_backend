@@ -1,11 +1,12 @@
 """Trip service for CRUD operations"""
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, func, asc, desc
 from app.models.trip import Trip
 from app.models.user import User
-from app.schemas.trip import TripCreate, TripUpdate
+from app.schemas.trip import TripCreate, TripUpdate, TripSearchParams, SortField, SortOrder
 from typing import Optional, List
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, date
 
 
 class TripService:
@@ -18,18 +19,71 @@ class TripService:
         self,
         user_id: UUID,
         skip: int = 0,
-        limit: int = 100
-    ) -> tuple[List[Trip], int]:
+        limit: int = 100,
+        search_params: Optional[TripSearchParams] = None
+    ) -> tuple[List[Trip], int, dict]:
         """
-        Get all trips for a user with pagination
+        Get all trips for a user with pagination and optional filtering
+
+        Args:
+            user_id: User's UUID
+            skip: Number of records to skip (for pagination)
+            limit: Maximum number of records to return
+            search_params: Optional search and filter parameters
 
         Returns:
-            Tuple of (trips list, total count)
+            Tuple of (trips list, total count, filters_applied dict)
         """
         query = self.db.query(Trip).filter(Trip.user_id == user_id)
+        filters_applied = {}
+
+        if search_params:
+            # Search by title (case-insensitive partial match)
+            if search_params.search:
+                search_term = f"%{search_params.search.lower()}%"
+                query = query.filter(func.lower(Trip.title).like(search_term))
+                filters_applied["search"] = search_params.search
+
+            # Filter by status(es)
+            if search_params.status:
+                status_values = [s.value for s in search_params.status]
+                query = query.filter(Trip.status.in_(status_values))
+                filters_applied["status"] = status_values
+
+            # Filter by start date range
+            if search_params.start_date_from:
+                query = query.filter(Trip.start_date >= search_params.start_date_from)
+                filters_applied["start_date_from"] = str(search_params.start_date_from)
+
+            if search_params.start_date_to:
+                query = query.filter(Trip.start_date <= search_params.start_date_to)
+                filters_applied["start_date_to"] = str(search_params.start_date_to)
+
+            # Filter by tags (trips containing ANY of the specified tags)
+            if search_params.tags:
+                tag_conditions = []
+                for tag in search_params.tags:
+                    tag_conditions.append(Trip.tags.contains([tag]))
+                query = query.filter(or_(*tag_conditions))
+                filters_applied["tags"] = search_params.tags
+
+            # Sorting
+            sort_column = getattr(Trip, search_params.sort_by.value)
+            if search_params.sort_order == SortOrder.asc:
+                query = query.order_by(asc(sort_column))
+            else:
+                query = query.order_by(desc(sort_column))
+
+            filters_applied["sort_by"] = search_params.sort_by.value
+            filters_applied["sort_order"] = search_params.sort_order.value
+        else:
+            # Default sorting by created_at descending
+            query = query.order_by(Trip.created_at.desc())
+
         total = query.count()
-        trips = query.order_by(Trip.created_at.desc()).offset(skip).limit(limit).all()
-        return trips, total
+        trips = query.offset(skip).limit(limit).all()
+
+        return trips, total, filters_applied if filters_applied else None
 
     def get_trip_by_id(self, trip_id: UUID, user_id: UUID) -> Optional[Trip]:
         """Get a specific trip by ID (with user ownership check)"""
@@ -95,15 +149,27 @@ class TripService:
 
         return True
 
+    def get_available_tags(self, user_id: UUID) -> List[str]:
+        """
+        Get all unique tags used across user's trips.
+        Useful for tag autocomplete in the frontend.
+        """
+        trips = self.db.query(Trip.tags).filter(Trip.user_id == user_id).all()
+        all_tags = set()
+        for (tags,) in trips:
+            if tags:
+                all_tags.update(tags)
+        return sorted(list(all_tags))
+
     def create_default_trips_for_user(self, user_id: UUID) -> List[Trip]:
         """
         Create default sample trips for a new user.
         Called after user registration to give them starter content.
         """
-        from datetime import date, timedelta
-        
+        from datetime import timedelta
+
         today = date.today()
-        
+
         default_trips = [
             {
                 "title": "Weekend in Paris",
@@ -142,7 +208,7 @@ class TripService:
                 "tags": ["usa", "city", "entertainment"]
             }
         ]
-        
+
         created_trips = []
         for trip_data in default_trips:
             db_trip = Trip(
@@ -157,11 +223,11 @@ class TripService:
             )
             self.db.add(db_trip)
             created_trips.append(db_trip)
-        
+
         self.db.commit()
-        
+
         # Refresh all trips to get their IDs
         for trip in created_trips:
             self.db.refresh(trip)
-        
+
         return created_trips
