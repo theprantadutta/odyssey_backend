@@ -10,6 +10,7 @@ from app.models.trip_share import TripShare
 from app.models.trip_template import TripTemplate
 from app.models.weather_cache import WeatherCache
 from app.models.exchange_rate import ExchangeRate, SupportedCurrency
+from app.models.achievement import Achievement, UserAchievement
 
 __all__ = [
     "User",
@@ -24,4 +25,6 @@ __all__ = [
     "WeatherCache",
     "ExchangeRate",
     "SupportedCurrency",
+    "Achievement",
+    "UserAchievement",
 ]

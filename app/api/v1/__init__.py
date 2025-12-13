@@ -12,6 +12,8 @@ from app.api.v1 import (
     templates,
     weather,
     currency,
+    achievements,
+    statistics,
     seed,
 )
 
@@ -28,4 +30,6 @@ api_router.include_router(sharing.router, tags=["sharing"])
 api_router.include_router(templates.router, prefix="/templates", tags=["templates"])
 api_router.include_router(weather.router, tags=["weather"])
 api_router.include_router(currency.router, tags=["currency"])
+api_router.include_router(achievements.router, tags=["achievements"])
+api_router.include_router(statistics.router, tags=["statistics"])
 api_router.include_router(seed.router, prefix="/seed", tags=["seed"])
