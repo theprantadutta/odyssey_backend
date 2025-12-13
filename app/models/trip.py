@@ -33,6 +33,7 @@ class Trip(Base):
     activities = relationship("Activity", back_populates="trip", cascade="all, delete-orphan")
     memories = relationship("Memory", back_populates="trip", cascade="all, delete-orphan")
     expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
+    packing_items = relationship("PackingItem", back_populates="trip", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Trip(id={self.id}, title={self.title}, status={self.status})>"
