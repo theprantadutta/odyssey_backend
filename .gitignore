@@ -46,3 +46,7 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Firebase credentials
+firebase-admin-sdk.json
+*-firebase-adminsdk-*.json
