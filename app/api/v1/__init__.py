@@ -1,6 +1,6 @@
 """API v1 routes"""
 from fastapi import APIRouter
-from app.api.v1 import auth, trips, activities, memories, expenses, packing, documents, seed
+from app.api.v1 import auth, trips, activities, memories, expenses, packing, documents, sharing, seed
 
 api_router = APIRouter()
 
@@ -11,4 +11,5 @@ api_router.include_router(memories.router, prefix="/memories", tags=["memories"]
 api_router.include_router(expenses.router, prefix="/expenses", tags=["expenses"])
 api_router.include_router(packing.router, prefix="/packing", tags=["packing"])
 api_router.include_router(documents.router, prefix="/documents", tags=["documents"])
+api_router.include_router(sharing.router, tags=["sharing"])
 api_router.include_router(seed.router, prefix="/seed", tags=["seed"])

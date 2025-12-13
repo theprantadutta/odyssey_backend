@@ -20,6 +20,7 @@ from app.models.memory import Memory
 from app.models.expense import Expense
 from app.models.packing_item import PackingItem
 from app.models.document import Document
+from app.models.trip_share import TripShare
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

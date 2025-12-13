@@ -6,5 +6,6 @@ from app.models.memory import Memory
 from app.models.expense import Expense
 from app.models.packing_item import PackingItem
 from app.models.document import Document
+from app.models.trip_share import TripShare
 
-__all__ = ["User", "Trip", "Activity", "Memory", "Expense", "PackingItem", "Document"]
+__all__ = ["User", "Trip", "Activity", "Memory", "Expense", "PackingItem", "Document", "TripShare"]

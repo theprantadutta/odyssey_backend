@@ -35,6 +35,7 @@ class Trip(Base):
     expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
     packing_items = relationship("PackingItem", back_populates="trip", cascade="all, delete-orphan")
     documents = relationship("Document", back_populates="trip", cascade="all, delete-orphan")
+    shares = relationship("TripShare", back_populates="trip", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Trip(id={self.id}, title={self.title}, status={self.status})>"
