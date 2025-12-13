@@ -2,6 +2,7 @@
 from fastapi import APIRouter
 from app.api.v1 import (
     auth,
+    auth_google,
     trips,
     activities,
     memories,
@@ -20,6 +21,7 @@ from app.api.v1 import (
 api_router = APIRouter()
 
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
+api_router.include_router(auth_google.router, prefix="/auth", tags=["google-auth"])
 api_router.include_router(trips.router, prefix="/trips", tags=["trips"])
 api_router.include_router(activities.router, prefix="/activities", tags=["activities"])
 api_router.include_router(memories.router, prefix="/memories", tags=["memories"])

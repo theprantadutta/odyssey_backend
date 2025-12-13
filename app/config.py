@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str
     CLOUDINARY_API_SECRET: str
 
+    # Firebase (Google Authentication)
+    FIREBASE_PROJECT_ID: str = ""
+    FIREBASE_AUTH_ENABLED: bool = True
+    GOOGLE_WEB_CLIENT_ID: str = ""
+    FCM_CREDENTIALS_PATH: str = "firebase-admin-sdk.json"
+
     # Server
     HOST: str = "0.0.0.0"
     PORT: int = 8546
