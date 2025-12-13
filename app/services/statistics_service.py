@@ -82,11 +82,7 @@ class StatisticsService:
         # Calculate stats
         total_trips = len(trips)
         total_days = sum(
-            (
-                datetime.strptime(t.end_date, "%Y-%m-%d")
-                - datetime.strptime(t.start_date, "%Y-%m-%d")
-            ).days
-            + 1
+            (t.end_date - t.start_date).days + 1
             for t in trips
             if t.start_date and t.end_date
         )
@@ -147,10 +143,7 @@ class StatisticsService:
         longest_days = 0
         for trip in trips:
             if trip.start_date and trip.end_date:
-                days = (
-                    datetime.strptime(trip.end_date, "%Y-%m-%d")
-                    - datetime.strptime(trip.start_date, "%Y-%m-%d")
-                ).days + 1
+                days = (trip.end_date - trip.start_date).days + 1
                 if days > longest_days:
                     longest_days = days
                     longest_trip = trip
@@ -159,7 +152,7 @@ class StatisticsService:
         trips_by_month = defaultdict(int)
         for trip in trips:
             if trip.start_date:
-                month = datetime.strptime(trip.start_date, "%Y-%m-%d").strftime("%B")
+                month = trip.start_date.strftime("%B")
                 trips_by_month[month] += 1
 
         # Most active month
@@ -254,8 +247,8 @@ class StatisticsService:
                     trip_id=str(trip.id),
                     title=trip.title,
                     destination=trip.destination,
-                    start_date=datetime.strptime(trip.start_date, "%Y-%m-%d").date(),
-                    end_date=datetime.strptime(trip.end_date, "%Y-%m-%d").date(),
+                    start_date=trip.start_date,
+                    end_date=trip.end_date,
                     status=trip.status,
                     cover_image_url=trip.cover_image_url,
                     activities_count=activities_count,
@@ -327,10 +320,7 @@ class StatisticsService:
         trip_count = 0
         for trip in trips:
             if trip.start_date and trip.end_date:
-                days = (
-                    datetime.strptime(trip.end_date, "%Y-%m-%d")
-                    - datetime.strptime(trip.start_date, "%Y-%m-%d")
-                ).days + 1
+                days = (trip.end_date - trip.start_date).days + 1
                 total_days += days
                 trip_count += 1
 
@@ -546,10 +536,7 @@ class StatisticsService:
         total_days = 0
         for trip in trips:
             if trip.start_date and trip.end_date:
-                days = (
-                    datetime.strptime(trip.end_date, "%Y-%m-%d")
-                    - datetime.strptime(trip.start_date, "%Y-%m-%d")
-                ).days + 1
+                days = (trip.end_date - trip.start_date).days + 1
                 total_days += days
 
         return total_days
