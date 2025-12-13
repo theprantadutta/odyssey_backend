@@ -17,6 +17,7 @@ from app.models.user import User
 from app.models.trip import Trip
 from app.models.activity import Activity
 from app.models.memory import Memory
+from app.models.expense import Expense
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
