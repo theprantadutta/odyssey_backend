@@ -6,7 +6,7 @@ from typing import Optional
 
 from app.database import get_db
 from app.models.user import User
-from app.api.deps import get_current_user
+from app.core.dependencies import get_current_user
 from app.services.template_service import TemplateService
 from app.schemas.template import (
     TripTemplateCreate,
