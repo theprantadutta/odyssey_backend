@@ -30,7 +30,8 @@ class AuthService:
         db_user = User(
             email=user_data.email,
             password_hash=hashed_password,
-            is_active=True
+            is_active=True,
+            display_name=user_data.display_name,
         )
 
         self.db.add(db_user)

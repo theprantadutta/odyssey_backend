@@ -233,6 +233,101 @@ async def link_google_account(
     }
 
 
+@router.post("/auto-link-google", response_model=Token)
+async def auto_link_google_account(
+    request: FirebaseAuthRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Automatically link Google account to existing email/password account
+
+    This endpoint trusts Google's email verification to prove ownership,
+    so no password is required. Used when user clicks "Yes" to link accounts.
+    """
+    auth_service = AuthService(db)
+
+    # Verify Firebase token
+    try:
+        decoded_token = verify_firebase_token(request.firebase_token)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e)
+        )
+
+    # Extract user info
+    user_info = get_user_info_from_token(decoded_token)
+    firebase_uid = user_info['firebase_uid']
+    email = user_info['email']
+    google_id = user_info['google_id']
+
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is required for account linking"
+        )
+
+    # Verify email is verified by Google
+    if not user_info.get('email_verified', False):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email must be verified by Google to auto-link accounts"
+        )
+
+    # Find existing user by email
+    user = auth_service.get_user_by_email(email)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email"
+        )
+
+    # Check if Firebase UID or Google ID is already linked to another account
+    if firebase_uid:
+        existing = db.query(User).filter(
+            User.firebase_uid == firebase_uid,
+            User.id != user.id
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This Google account is already linked to another user"
+            )
+
+    if google_id:
+        existing = db.query(User).filter(
+            User.google_id == google_id,
+            User.id != user.id
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This Google account is already linked to another user"
+            )
+
+    # Link accounts (no password verification needed - Google verified the email)
+    user.firebase_uid = firebase_uid
+    user.google_id = google_id
+    user.auth_provider = 'google'
+    user.display_name = user_info['display_name'] or user.display_name
+    user.photo_url = user_info['photo_url'] or user.photo_url
+    user.email_verified = True  # Google verified it
+    user.last_login = datetime.utcnow()
+
+    db.commit()
+    logger.info(f"Google account auto-linked to user: {email}")
+
+    # Create access token
+    access_token = auth_service.create_access_token_for_user(user)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": str(user.id)
+    }
+
+
 @router.post("/unlink-google")
 async def unlink_google_account(
     db: Session = Depends(get_db),

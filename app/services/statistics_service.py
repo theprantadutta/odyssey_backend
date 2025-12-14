@@ -87,11 +87,11 @@ class StatisticsService:
             if t.start_date and t.end_date
         )
 
-        # Destinations (from trip destinations field)
+        # Destinations (using trip titles as destinations since there's no separate destination field)
         destinations = set()
         for trip in trips:
-            if trip.destination:
-                destinations.add(trip.destination)
+            if trip.title:
+                destinations.add(trip.title)
 
         # Get activities count for year
         total_activities = (
@@ -346,10 +346,11 @@ class StatisticsService:
             or 0
         )
 
+        # Count activities as "completed" if their scheduled_time is in the past
         completed = (
             self.db.query(func.count(Activity.id))
             .join(Trip)
-            .filter(and_(Trip.user_id == user_id, Activity.is_completed == True))
+            .filter(and_(Trip.user_id == user_id, Activity.scheduled_time < datetime.utcnow()))
             .scalar()
             or 0
         )

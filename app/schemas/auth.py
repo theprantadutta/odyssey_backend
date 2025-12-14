@@ -20,6 +20,7 @@ class UserRegister(BaseModel):
     """User registration request"""
     email: EmailStr
     password: str
+    display_name: Optional[str] = None
 
 
 class UserLogin(BaseModel):

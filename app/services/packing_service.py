@@ -1,6 +1,6 @@
 """Packing service for CRUD operations and progress tracking"""
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, Integer
 from app.models.packing_item import PackingItem
 from app.models.trip import Trip
 from app.schemas.packing import PackingItemCreate, PackingItemUpdate
