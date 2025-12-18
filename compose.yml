@@ -1,5 +1,5 @@
 services:
-  backend:
+  odyssey_backend:
     build: .
     env_file:
       - .env
